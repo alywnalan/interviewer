@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Interviewer - Smart Interview Practice</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --bg-soft: #111827;
+      --card: #020617;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.15);
+      --accent-strong: #22c55e;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --danger: #f97373;
+      --radius-xl: 18px;
+      --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.9);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top left, #0f172a, #020617 50%, #000);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 1120px;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.98));
+      border-radius: 24px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      display: grid;
+      grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+      overflow: hidden;
+    }
+
+    /* Left panel */
+    .side-panel {
+      padding: 22px 22px 20px;
+      border-right: 1px solid rgba(148, 163, 184, 0.3);
+      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 60%);
+    }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 20% 20%, #22c55e, #0ea5e9);
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.65);
+    }
+
+    .brand-text h1 {
+      font-size: 18px;
+      font-weight: 650;
+      letter-spacing: 0.01em;
+    }
+
+    .brand-text span {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .pill {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      color: var(--muted);
+    }
+
+    .hero-copy {
+      margin-bottom: 14px;
+    }
+
+    .hero-copy h2 {
+      font-size: 19px;
+      font-weight: 650;
+      margin-bottom: 4px;
+    }
+
+    .hero-copy p {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .pill-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .pill-row .chip {
+      font-size: 11px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .config-card {
+      background: rgba(15, 23, 42, 0.82);
+      border-radius: var(--radius-xl);
+      padding: 14px 14px 12px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.7);
+      margin-bottom: 12px;
+    }
+
+    .config-card h3 {
+      font-size: 13px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .field {
+      margin-bottom: 10px;
+    }
+
+    .field label {
+      font-size: 11px;
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+    }
+
+    select {
+      width: 100%;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--text);
+      font-size: 12px;
+      outline: none;
+    }
+
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
+    }
+
+    .button-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+      margin-bottom: 6px;
+    }
+
+    button {
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      padding: 7px 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #22c55e, #38bdf8);
+      color: #020617;
+      font-weight: 600;
+      box-shadow: 0 10px 20px rgba(34, 197, 94, 0.45);
+      flex: 1;
+    }
+
+    .btn-ghost {
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--muted);
+      border: 1px solid rgba(148, 163, 184, 0.6);
+    }
+
+    .status {
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-top: 2px;
+    }
+
+    .status span.highlight {
+      color: var(--accent);
+    }
+
+    .tips-card {
+      margin-top: 16px;
+      padding: 10px 11px;
+      border-radius: var(--radius-xl);
+      border: 1px dashed rgba(148, 163, 184, 0.7);
+      background: rgba(15, 23, 42, 0.85);
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .tips-card strong {
+      color: var(--accent);
+    }
+
+    /* Right / chat panel */
+    .chat-panel {
+      display: flex;
+      flex-direction: column;
+      padding: 18px 18px 14px;
+    }
+
+    .chat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 8px;
+    }
+
+    .chat-header-info h2 {
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .chat-header-info p {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .mode-tag {
+      font-size: 10px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.6);
+    }
+
+    .timer-tag {
+      font-size: 10px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.8);
+      color: var(--muted);
+      border: 1px dashed rgba(148, 163, 184, 0.7);
+    }
+
+    .chat-window {
+      flex: 1;
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), #020617);
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(30, 64, 175, 0.7);
+      padding: 14px 10px;
+      overflow-y: auto;
+      max-height: 520px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(148, 163, 184, 0.7) transparent;
+    }
+
+    .chat-window::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .chat-window::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.7);
+      border-radius: 999px;
+    }
+
+    .message {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      margin-bottom: 10px;
+      max-width: 92%;
+    }
+
+    .message.bot {
+      flex-direction: row;
+    }
+
+    .message.user {
+      flex-direction: row-reverse;
+      margin-left: auto;
+    }
+
+    .avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.7);
+    }
+
+    .avatar.bot {
+      background: radial-gradient(circle at 20% 20%, #22c55e, #0ea5e9);
+      border: none;
+      color: white;
+    }
+
+    .bubble {
+      padding: 8px 11px;
+      border-radius: 14px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .message.bot .bubble {
+      border-bottom-left-radius: 4px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+    }
+
+    .message.user .bubble {
+      border-bottom-right-radius: 4px;
+      background: #1e293b;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+    }
+
+    .chat-input-row {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .input-shell {
+      flex: 1;
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 999px;
+      padding: 6px 9px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .input-shell input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--text);
+      font-size: 12px;
+    }
+
+    .input-shell input::placeholder {
+      color: var(--muted);
+    }
+
+    .send-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, #22c55e, #38bdf8);
+      color: #020617;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 15px;
+      box-shadow: 0 8px 18px rgba(34, 197, 94, 0.5);
+    }
+
+    .helper {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .report-card {
+      margin-top: 10px;
+      padding: 12px 14px;
+      border-radius: var(--radius-xl);
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      font-size: 12px;
+    }
+
+    .report-card h4 {
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    .report-card ul {
+      list-style: none;
+      padding-left: 0;
+      margin: 6px 0 8px;
+    }
+
+    .report-card li {
+      margin-bottom: 3px;
+    }
+
+    .report-tag {
+      display: inline-block;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(22, 163, 74, 0.1);
+      color: var(--accent-strong);
+      border: 1px solid rgba(34, 197, 94, 0.6);
+      margin-left: 6px;
+    }
+
+    @media (max-width: 840px) {
+      .app-shell {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .side-panel {
+        border-right: none;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+      }
+
+      .chat-window {
+        max-height: 460px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- LEFT: configuration -->
+    <aside class="side-panel">
+      <div class="logo-row">
+        <div class="brand">
+          <div class="brand-icon">AI</div>
+          <div class="brand-text">
+            <h1>Interview Coach</h1>
+            <span>Practice any interview, anytime.</span>
+          </div>
+        </div>
+        <div class="pill">Live • Gemini Powered</div>
+      </div>
+
+      <div class="hero-copy">
+        <h2>Choose your interview mode</h2>
+        <p>
+          Pick your field, round type, and difficulty. The AI interviewer will generate questions
+          in real time and give feedback.
+        </p>
+      </div>
+
+      <div class="pill-row">
+        <div class="chip">🎓 Engineering</div>
+        <div class="chip">📊 Business</div>
+        <div class="chip">⚖️ Law</div>
+        <div class="chip">🇮🇳 UPSC / Govt</div>
+        <div class="chip">🧠 Aptitude</div>
+        <div class="chip">💼 HR &amp; GD</div>
+        <div class="chip">💻 Coding</div>
+      </div>
+
+      <div class="config-card">
+        <h3>1. Interview configuration</h3>
+        <div class="field">
+          <label for="domainSelect">Choose your field</label>
+          <select id="domainSelect">
+            <option value="engineering">Engineering / IT</option>
+            <option value="business">Business / Management</option>
+            <option value="law">Law</option>
+            <option value="upsc">UPSC / Govt Exams</option>
+            <option value="generic">Any / Not listed</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="roundSelect">Choose interview round</label>
+          <select id="roundSelect">
+            <option value="aptitude">Aptitude (MCQ test)</option>
+            <option value="technical">Technical round</option>
+            <option value="coding">Coding round</option>
+            <option value="hr">HR / Face to Face</option>
+            <option value="gd">Group discussion simulation</option>
+            <option value="me">“Just Me” self-reflection</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="difficultySelect">Difficulty level</label>
+          <select id="difficultySelect">
+            <option value="auto">Auto (easy → hard)</option>
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+
+        <div class="button-row">
+          <button class="btn-primary" id="startBtn">
+            <span>▶</span> Start Interview
+          </button>
+          <button class="btn-ghost" id="endBtn">
+            <span>⏹</span> End / Reset
+          </button>
+        </div>
+
+        <div class="status">
+          <span id="statusLine">Status:
+            <span class="highlight">Idle • No interview running</span>
+          </span>
+          <span id="progressLine"></span>
+        </div>
+      </div>
+
+      <div class="tips-card">
+        <div>💡</div>
+        <div>
+          <strong>Tip:</strong> Answer as you would in a real interview.<br>
+          • For <strong>aptitude</strong>, type A/B/C/D.<br>
+          • For <strong>coding</strong>, explain your logic or write code (any language).<br>
+          • For <strong>GD</strong>, respond as if you are speaking in a group.<br>
+          At the end, you’ll see a <strong>summary report</strong> based on your answers and time taken.
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT: chat -->
+    <main class="chat-panel">
+      <header class="chat-header">
+        <div class="chat-header-info">
+          <h2>
+            <span>🤖 AI Interviewer</span>
+            <span class="mode-tag" id="modeTag">Mode: None</span>
+            <span class="timer-tag" id="timerTag">Time: 00:00</span>
+            <span class="timer-tag" id="questionTimerTag">Q-Time: --</span>
+          </h2>
+          <p>
+            I will play the role of your interviewer. Questions are generated live by an AI model,
+            based on your selected field and round.
+          </p>
+        </div>
+      </header>
+
+      <section class="chat-window" id="chatWindow">
+        <!-- Messages injected via JS -->
+      </section>
+
+      <form class="chat-input-row" id="chatForm">
+        <div class="input-shell">
+          <input
+            id="userInput"
+            type="text"
+            placeholder="Type your answer here and press Enter…"
+            autocomplete="off"
+          />
+        </div>
+        <button type="submit" class="sendBtn send-btn" id="sendBtn">➤</button>
+      </form>
+      <div class="helper">
+        Press <strong>Enter</strong> to send. Start an interview from the left panel first.
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const API_BASE = "http://localhost:4000";
+
+    const state = {
+      active: false,
+      domain: "engineering",
+      round: "aptitude",
+      baseDifficulty: "auto",
+      currentQuestionIndex: 0,
+      lastQuestionMeta: null,
+      answers: [],
+      transcript: [],
+      expectingAnswer: false,
+      startTime: null,
+      elapsedSeconds: 0,
+      timerIntervalId: null,
+      maxQuestions: 6,
+      questionTimeLimit: 90,
+      questionStartTime: null
+    };
+
+    const chatWindow = document.getElementById("chatWindow");
+    const userInput = document.getElementById("userInput");
+    const chatForm = document.getElementById("chatForm");
+    const startBtn = document.getElementById("startBtn");
+    const endBtn = document.getElementById("endBtn");
+    const domainSelect = document.getElementById("domainSelect");
+    const roundSelect = document.getElementById("roundSelect");
+    const difficultySelect = document.getElementById("difficultySelect");
+    const statusLine = document.getElementById("statusLine");
+    const progressLine = document.getElementById("progressLine");
+    const modeTag = document.getElementById("modeTag");
+    const timerTag = document.getElementById("timerTag");
+    const questionTimerTag = document.getElementById("questionTimerTag");
+
+    function addMessage(text, sender = "bot") {
+      const message = document.createElement("div");
+      message.classList.add("message", sender);
+
+      const avatar = document.createElement("div");
+      avatar.classList.add("avatar", sender === "bot" ? "bot" : "user");
+      avatar.textContent = sender === "bot" ? "🤖" : "🧑";
+
+      const bubble = document.createElement("div");
+      bubble.classList.add("bubble");
+      bubble.innerHTML = text;
+
+      message.appendChild(avatar);
+      message.appendChild(bubble);
+      chatWindow.appendChild(message);
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+
+      const plain = text.replace(/<[^>]+>/g, "");
+      state.transcript.push({ role: sender, content: plain });
+    }
+
+    function clearChat() {
+      chatWindow.innerHTML = "";
+      state.transcript = [];
+    }
+
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+    }
+
+    function getQuestionTimeLimit(round) {
+      if (round === "aptitude") return 90;     // 1.5 min
+      if (round === "coding") return 300;      // 5 min
+      return 180;                              // 3 min for HR/Technical/GD/Me
+    }
+
+    function startTimer() {
+      if (state.timerIntervalId) clearInterval(state.timerIntervalId);
+      state.startTime = Date.now();
+      state.elapsedSeconds = 0;
+      timerTag.textContent = "Time: 00:00";
+
+      state.timerIntervalId = setInterval(() => {
+        const diff = Math.floor((Date.now() - state.startTime) / 1000);
+        state.elapsedSeconds = diff;
+        timerTag.textContent = "Time: " + formatTime(diff);
+
+        if (state.active && state.questionStartTime) {
+          const qDiff = Math.floor((Date.now() - state.questionStartTime) / 1000);
+          const remain = Math.max(0, state.questionTimeLimit - qDiff);
+          questionTimerTag.textContent = "Q-Time: " + formatTime(remain);
+        }
+      }, 1000);
+    }
+
+    function stopTimer() {
+      if (state.timerIntervalId) {
+        clearInterval(state.timerIntervalId);
+        state.timerIntervalId = null;
+      }
+      timerTag.textContent = "Time: " + formatTime(state.elapsedSeconds || 0);
+      questionTimerTag.textContent = "Q-Time: --";
+      state.questionStartTime = null;
+    }
+
+    function getFieldLabel(domain) {
+      return {
+        engineering: "Engineering / IT",
+        business: "Business / Management",
+        law: "Law",
+        upsc: "UPSC / Govt",
+        generic: "Generic / Any"
+      }[domain] || domain;
+    }
+
+    function getRoundLabel(round) {
+      return {
+        aptitude: "Aptitude",
+        technical: "Technical",
+        coding: "Coding",
+        hr: "HR / Face to Face",
+        gd: "Group Discussion",
+        me: "Just Me"
+      }[round] || round;
+    }
+
+    function updateStatus() {
+      if (!state.active) {
+        statusLine.innerHTML = 'Status: <span class="highlight">Idle • No interview running</span>';
+        progressLine.textContent = "";
+        modeTag.textContent = "Mode: None";
+        questionTimerTag.textContent = "Q-Time: --";
+        return;
+      }
+
+      const fieldLabel = getFieldLabel(state.domain);
+      const roundLabel = getRoundLabel(state.round);
+
+      statusLine.innerHTML =
+        'Status: <span class="highlight">Active • ' + fieldLabel + " • " + roundLabel + "</span>";
+      progressLine.textContent =
+        "Question " +
+        (state.currentQuestionIndex + 1) +
+        " of " +
+        state.maxQuestions;
+      modeTag.textContent = "Mode: " + roundLabel;
+    }
+
+    async function fetchNextQuestion() {
+      const payload = {
+        domain: state.domain,
+        round: state.round,
+        baseDifficulty: state.baseDifficulty,
+        questionIndex: state.currentQuestionIndex,
+        previousAnswers: state.answers
+      };
+
+      const res = await fetch(API_BASE + "/api/next-question", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        throw new Error("HTTP " + res.status);
+      }
+
+      return res.json();
+    }
+
+    async function askNextQuestion() {
+      if (!state.active) return;
+
+      if (state.currentQuestionIndex >= state.maxQuestions) {
+        endInterview(false);
+        return;
+      }
+
+      try {
+        addMessage("Thinking of the next question…", "bot");
+        state.expectingAnswer = false;
+
+        const data = await fetchNextQuestion();
+        state.lastQuestionMeta = data;
+        state.currentQuestionIndex++;
+
+        let html = `<strong>Q${state.currentQuestionIndex} (${data.difficulty || "?"}).</strong> ${
+          data.question || "No question"
+        }`;
+
+        if (data.question_type === "mcq" && Array.isArray(data.options) && data.options.length > 0) {
+          html += "<br><br>";
+          data.options.forEach((opt, idx) => {
+            const label = String.fromCharCode(65 + idx);
+            html += `<strong>${label})</strong> ${opt}<br>`;
+          });
+          html += `<br><em>Type A, B, C, or D.</em>`;
+        }
+
+        if (data.followup_tip) {
+          html += `<br><br><em>${data.followup_tip}</em>`;
+        }
+
+        addMessage(html, "bot");
+
+        // reset per-question timer
+        state.questionTimeLimit = getQuestionTimeLimit(state.round);
+        state.questionStartTime = Date.now();
+        questionTimerTag.textContent = "Q-Time: " + formatTime(state.questionTimeLimit);
+
+        state.expectingAnswer = true;
+        updateStatus();
+      } catch (err) {
+        console.error(err);
+        addMessage(
+          "⚠️ I couldn't fetch the next AI question. Please check your backend or try again.",
+          "bot"
+        );
+        state.expectingAnswer = false;
+      }
+    }
+
+    function summariseAnswers() {
+      const totalAnswers = state.answers.length;
+      if (!totalAnswers) {
+        return {
+          avgLength: 0,
+          richness: "No answers recorded.",
+        };
+      }
+      const avgLength =
+        state.answers.reduce((sum, a) => sum + a.length, 0) / totalAnswers;
+
+      let richness;
+      if (avgLength > 300 && state.round === "coding") {
+        richness =
+          "Your coding answers are detailed. Try to mention time/space complexity and edge cases explicitly.";
+      } else if (avgLength > 180) {
+        richness = "Your answers are detailed and well-explained. Good depth!";
+      } else if (avgLength > 80) {
+        richness =
+          "Your answers have decent detail. Try adding more specific examples to improve further.";
+      } else {
+        richness =
+          "Your answers are quite short. In real interviews, elaborate more with examples and clear structure.";
+      }
+
+      return { avgLength, richness };
+    }
+
+    function buildReportCardHTML() {
+      const duration = formatTime(state.elapsedSeconds || 0);
+      const fieldLabel = getFieldLabel(state.domain);
+      const roundLabel = getRoundLabel(state.round);
+
+      if (state.round === "aptitude") {
+        const comment =
+          "This was an AI-generated aptitude set. Review your mistakes and focus on concepts where you felt unsure.";
+
+        return `
+          <div class="report-card">
+            <h4>📊 Interview Report <span class="report-tag">Aptitude</span></h4>
+            <ul>
+              <li><strong>Domain:</strong> ${fieldLabel}</li>
+              <li><strong>Round:</strong> Aptitude Test (AI-generated)</li>
+              <li><strong>Duration:</strong> ${duration}</li>
+              <li><strong>Questions attempted:</strong> ${state.maxQuestions}</li>
+            </ul>
+            <p><strong>Comment:</strong> ${comment}</p>
+            <p style="margin-top:6px;">
+              <strong>Next steps:</strong> Practice 10–15 similar questions daily and focus on speed + accuracy.
+            </p>
+          </div>
+        `;
+      } else {
+        const summary = summariseAnswers();
+        const tagText = state.round === "coding" ? "Coding Round" : "Summary";
+
+        return `
+          <div class="report-card">
+            <h4>📊 Interview Report <span class="report-tag">${tagText}</span></h4>
+            <ul>
+              <li><strong>Domain:</strong> ${fieldLabel}</li>
+              <li><strong>Round:</strong> ${roundLabel}</li>
+              <li><strong>Duration:</strong> ${duration}</li>
+              <li><strong>Questions answered:</strong> ${summary.avgLength === 0 ? 0 : state.answers.length}</li>
+              <li><strong>Avg. answer size:</strong> ${Math.round(summary.avgLength)} characters</li>
+            </ul>
+            <p><strong>Richness:</strong> ${summary.richness}</p>
+            <p style="margin-top:6px;">
+              <strong>Pro tip:</strong> ${
+                state.round === "coding"
+                  ? "Explain your algorithm, then mention time/space complexity and how you'd handle edge cases."
+                  : "Use <em>STAR</em> – <strong>Situation → Task → Action → Result</strong> – for experience-based answers."
+              }</p>
+          </div>
+        `;
+      }
+    }
+
+    function startInterview() {
+      state.domain = domainSelect.value;
+      state.round = roundSelect.value;
+      state.baseDifficulty = difficultySelect.value;
+
+      state.active = true;
+      state.currentQuestionIndex = 0;
+      state.answers = [];
+      state.transcript = [];
+      state.expectingAnswer = false;
+      state.elapsedSeconds = 0;
+      state.lastQuestionMeta = null;
+      state.questionTimeLimit = getQuestionTimeLimit(state.round);
+      state.questionStartTime = null;
+
+      clearChat();
+      startTimer();
+
+      const fieldLabel = getFieldLabel(state.domain);
+      const roundLabel = getRoundLabel(state.round);
+
+      addMessage(
+        `Hi, I’m your <strong>AI Interviewer</strong>. We’ll do a <strong>${roundLabel.toUpperCase()}</strong> round for <strong>${fieldLabel}</strong>.<br><br>` +
+        `Questions will be generated live by an AI model, and I’ll give quick feedback during the interview.`,
+        "bot"
+      );
+
+      if (state.round === "aptitude") {
+        addMessage(
+          "For aptitude questions, please answer using <strong>A</strong>, <strong>B</strong>, <strong>C</strong>, or <strong>D</strong>.",
+          "bot"
+        );
+      } else if (state.round === "coding") {
+        addMessage(
+          "For coding questions, explain your approach and, if possible, write code or pseudo-code. Mention time/space complexity and edge cases.",
+          "bot"
+        );
+      }
+
+      askNextQuestion();
+      updateStatus();
+    }
+
+    function endInterview(manual = true) {
+      if (!state.active && manual) {
+        addMessage(
+          "There is no interview running right now. Configure one on the left and click <strong>Start Interview</strong>.",
+          "bot"
+        );
+        return;
+      }
+
+      if (state.active) {
+        stopTimer();
+        const reportHTML = buildReportCardHTML();
+        addMessage(reportHTML, "bot");
+      }
+
+      state.active = false;
+      state.expectingAnswer = false;
+      updateStatus();
+
+      if (manual) {
+        addMessage(
+          "Interview has been ended and the session is reset. You can start a new interview anytime.",
+          "bot"
+        );
+      }
+    }
+
+    function handleAptitudeAnswer(text) {
+      const meta = state.lastQuestionMeta;
+      if (!meta) return;
+
+      const valid = ["A", "B", "C", "D"];
+      const letter = text.trim().toUpperCase()[0];
+
+      if (!valid.includes(letter)) {
+        addMessage(
+          "Please answer with <strong>A</strong>, <strong>B</strong>, <strong>C</strong>, or <strong>D</strong> for this question.",
+          "bot"
+        );
+        return;
+      }
+
+      const idx = valid.indexOf(letter);
+      const correctIdx = meta.correct_option_index;
+
+      if (typeof correctIdx === "number" && idx === correctIdx) {
+        addMessage(
+          "✅ <strong>Correct!</strong> " + (meta.explanation || ""),
+          "bot"
+        );
+      } else {
+        const correctLetter = typeof correctIdx === "number" ? valid[correctIdx] : "?";
+        addMessage(
+          "❌ <strong>Not quite.</strong> The right answer is <strong>" +
+          correctLetter +
+          "</strong>.<br>" +
+          (meta.explanation || ""),
+          "bot"
+        );
+      }
+
+      state.expectingAnswer = false;
+      askNextQuestion();
+    }
+
+    function handleOpenAnswer(text) {
+      state.answers.push(text);
+
+      if (text.length < 40) {
+        addMessage(
+          "Try to expand a bit more — include context, what you did, and the outcome.",
+          "bot"
+        );
+      } else if (text.length > 260) {
+        addMessage(
+          "Nice, detailed answer! In real interviews, keep it structured while slightly more concise.",
+          "bot"
+        );
+      } else {
+        addMessage(
+          "Good answer. In a real interview, add 1–2 specific examples to make it stronger.",
+          "bot"
+        );
+      }
+
+      state.expectingAnswer = false;
+      askNextQuestion();
+    }
+
+    function handleUserMessage(event) {
+      event.preventDefault();
+      const text = userInput.value.trim();
+      if (!text) return;
+      userInput.value = "";
+
+      addMessage(text, "user");
+
+      if (!state.active) {
+        addMessage(
+          "There is no active interview. Please choose a field and round on the left, then click <strong>Start Interview</strong>.",
+          "bot"
+        );
+        return;
+      }
+
+      if (!state.expectingAnswer) {
+        addMessage(
+          "I will ask the questions one by one. Please answer the current question; then I will generate the next one.",
+          "bot"
+        );
+        return;
+      }
+
+      if (state.round === "aptitude") {
+        handleAptitudeAnswer(text);
+      } else {
+        handleOpenAnswer(text);
+      }
+
+      updateStatus();
+    }
+
+    startBtn.addEventListener("click", startInterview);
+    endBtn.addEventListener("click", () => endInterview(true));
+    chatForm.addEventListener("submit", handleUserMessage);
+
+    // Initial greeting
+    addMessage(
+      "👋 Welcome to <strong>AI Interview Coach</strong>.<br><br>" +
+      "1️⃣ Select your <strong>field</strong> (Engineering, Business, Law, UPSC, etc.).<br>" +
+      "2️⃣ Select your <strong>round type</strong> (Aptitude, Technical, Coding, HR, GD, or Just Me).<br>" +
+      "3️⃣ Choose <strong>difficulty</strong> and click <strong>Start Interview</strong> on the left.<br><br>" +
+      "I’ll then begin asking questions like a real interviewer. All questions are generated live by AI.",
+      "bot"
+    );
+    updateStatus();
+  </script>
+</body>
+</html>
